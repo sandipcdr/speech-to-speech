@@ -117,7 +117,6 @@ class AudioPipeline:
                 text = " ".join([item['hepburn'] for item in result])
                 print(f"DEBUG: Converted to Romaji: {text}")
 
-            output_buffer = io.BytesIO()
             with io.BytesIO() as wav_buffer:
                 import wave
                 with wave.open(wav_buffer, "wb") as wav_file:
@@ -126,8 +125,17 @@ class AudioPipeline:
                     wav_file.setsampwidth(2)  # 16-bit
                     wav_file.setframerate(voice.config.sample_rate)
                     
-                    # Synthesize
-                    voice.synthesize(text, wav_file)
+                    # Synthesize stream raw and write frames
+                    print("DEBUG: Starting PCM stream synthesis...")
+                    sample_count = 0
+                    for audio_bytes in voice.synthesize_stream_raw(text):
+                        if audio_bytes:
+                            chunk_size = len(audio_bytes)
+                            # print(f"DEBUG: Got PCM chunk size: {chunk_size}") # Verbose
+                            wav_file.writeframes(audio_bytes)
+                            sample_count += chunk_size
+                    
+                    print(f"DEBUG: Total PCM bytes written: {sample_count}")
                 
                 return wav_buffer.getvalue()
         except Exception as e:
