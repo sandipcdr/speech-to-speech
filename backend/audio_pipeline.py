@@ -80,6 +80,10 @@ class AudioPipeline:
             self.translator_tokenizer.src_lang = src_code
             inputs = self.translator_tokenizer(text, return_tensors="pt")
             
+            # DEBUG: Check what the model actually sees
+            print(f"DEBUG: Input Token IDs: {inputs.input_ids}")
+            print(f"DEBUG: Decoded Input: {self.translator_tokenizer.decode(inputs.input_ids[0])}")
+            
             print("DEBUG: Generating translation...")
             
             # Use convert_tokens_to_ids for compatibility
