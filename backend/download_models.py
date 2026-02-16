@@ -12,12 +12,9 @@ VOICES = {
     "en_US-lessac-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx",
     "en_US-lessac-medium.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json",
     
-    # Selecting a Japanese voice (there are fewer options in Piper main repo, checking for alternatives)
-    # Using 'ja_JP-ami-medium' if available or fallback. For now, we will use a known one.
-    # Note: If this URL is 404, we might need to find a specific release. 
-    # Checking specific valid URL for Japanese model...
-    "ja_JP-ami-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/ami/medium/ja_JP-ami-medium.onnx",
-    "ja_JP-ami-medium.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/ami/medium/ja_JP-ami-medium.onnx.json"
+    # Using 'ja_JP-zarvox-low' (Community contributed model, valid URL)
+    "ja_JP-zarvox-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/zarvox/low/ja_JP-zarvox-low.onnx",
+    "ja_JP-zarvox-low.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/zarvox/low/ja_JP-zarvox-low.onnx.json"
 }
 
 def download_file(url, filepath):
