@@ -53,6 +53,7 @@ class AudioPipeline:
         return text.strip()
 
     def translate(self, text: str, source_lang: str, target_lang: str):
+        print(f"DEBUG: Translating '{text}' from {source_lang} to {target_lang}")
         if not text:
             return ""
         
@@ -67,21 +68,33 @@ class AudioPipeline:
         src_code = lang_map.get(source_lang)
         tgt_code = lang_map.get(target_lang)
         
+        print(f"DEBUG: NLLB Codes: src={src_code}, tgt={tgt_code}")
+
         if not src_code or not tgt_code:
+            print("DEBUG: Language code not found in map, returning original text")
             return text # Fallback: return original
             
-        inputs = self.translator_tokenizer(text, return_tensors="pt")
-        
-        translated_tokens = self.translator_model.generate(
-            **inputs, 
-            forced_bos_token_id=self.translator_tokenizer.lang_code_to_id[tgt_code], 
-            max_length=128
-        )
-        
-        result = self.translator_tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]
-        return result
+        try:
+            print("DEBUG: Tokenizing input...")
+            inputs = self.translator_tokenizer(text, return_tensors="pt")
+            
+            print("DEBUG: Generating translation...")
+            translated_tokens = self.translator_model.generate(
+                **inputs, 
+                forced_bos_token_id=self.translator_tokenizer.lang_code_to_id[tgt_code], 
+                max_length=128
+            )
+            
+            print("DEBUG: Decoding output...")
+            result = self.translator_tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]
+            print(f"DEBUG: Translation result: {result}")
+            return result
+        except Exception as e:
+            print(f"ERROR in translate: {e}")
+            return f"[Translation Error] {text}"
 
     def synthesize(self, text: str, target_lang: str):
+        print(f"DEBUG: Synthesizing '{text}' for {target_lang}")
         if not text:
             return None
         
@@ -90,19 +103,18 @@ class AudioPipeline:
             print(f"No TTS voice found for {target_lang}")
             return None
             
-        # Piper expects a file-like object or path for output. 
-        # We want bytes in memory.
-        # PiperVoice.synthesize returns an iterator of audio chunks? 
-        # Actually standard python binding might write to a wav file object.
-        
-        output_buffer = io.BytesIO()
-        with io.BytesIO() as wav_buffer:
-            # We use a temporary wav buffer
-            import wave
-            with wave.open(wav_buffer, "wb") as wav_file:
-                voice.synthesize(text, wav_file)
-            
-            return wav_buffer.getvalue()
+        try:
+            output_buffer = io.BytesIO()
+            with io.BytesIO() as wav_buffer:
+                # We use a temporary wav buffer
+                import wave
+                with wave.open(wav_buffer, "wb") as wav_file:
+                    voice.synthesize(text, wav_file)
+                
+                return wav_buffer.getvalue()
+        except Exception as e:
+            print(f"ERROR in synthesize: {e}")
+            return None
 
 # Singleton instance
 # pipeline = AudioPipeline()
