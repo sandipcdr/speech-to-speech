@@ -79,9 +79,14 @@ class AudioPipeline:
             inputs = self.translator_tokenizer(text, return_tensors="pt")
             
             print("DEBUG: Generating translation...")
+            
+            # Use convert_tokens_to_ids for compatibility
+            forced_bos_token_id = self.translator_tokenizer.convert_tokens_to_ids(tgt_code)
+            print(f"DEBUG: Forced BOS token ID for {tgt_code}: {forced_bos_token_id}")
+            
             translated_tokens = self.translator_model.generate(
                 **inputs, 
-                forced_bos_token_id=self.translator_tokenizer.lang_code_to_id[tgt_code], 
+                forced_bos_token_id=forced_bos_token_id, 
                 max_length=128
             )
             
