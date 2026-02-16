@@ -126,33 +126,37 @@ class AudioPipeline:
             if target_lang == "ja":
                  text = "Test Audio"
 
-            import tempfile
-            import wave
+            # 1. Phonemize
+            phonemes = voice.phonemize(text)
+            print(f"DEBUG: Phonemes: {phonemes}")
             
-            # Create a real temporary file on disk
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tf:
-                temp_filename = tf.name
+            # 2. Convert to IDs
+            phoneme_ids = voice.phonemes_to_ids(phonemes)
+            print(f"DEBUG: Phoneme IDs: {phoneme_ids}")
             
-            try:
-                # Open the file with wave and synthesize
-                with wave.open(temp_filename, "wb") as wav_file:
+            # 3. Generate Audio
+            # output is typically (audio_bytes, sample_rate) or just audio_bytes generator?
+            # Based on method name, it likely returns the audio stream or generator.
+            
+            audio_stream = voice.phoneme_ids_to_audio(phoneme_ids)
+            
+            # 4. Write to BytesIO Buffer as WAV
+            with io.BytesIO() as wav_buffer:
+                import wave
+                with wave.open(wav_buffer, "wb") as wav_file:
                     wav_file.setnchannels(1)
                     wav_file.setsampwidth(2)
                     wav_file.setframerate(voice.config.sample_rate)
-                    voice.synthesize(text, wav_file)
                     
-                    print(f"DEBUG: Wav file frames after write: {wav_file.getnframes()}")
-
-                # Read the file back into memory
-                with open(temp_filename, "rb") as f:
-                    wav_data = f.read()
+                    # Consume stream
+                    sample_count = 0
+                    for chunk in audio_stream:
+                        wav_file.writeframes(chunk)
+                        sample_count += len(chunk)
+                        
+                    print(f"DEBUG: Written {sample_count} raw bytes to WAV")
                 
-                print(f"DEBUG: Read {len(wav_data)} bytes from temp wav file")
-                return wav_data
-                
-            finally:
-                if os.path.exists(temp_filename):
-                    os.unlink(temp_filename)
+                return wav_buffer.getvalue()
         except Exception as e:
             print(f"ERROR in synthesize: {e}")
             return None
