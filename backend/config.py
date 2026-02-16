@@ -13,8 +13,9 @@ class Config:
     STT_COMPUTE_TYPE = "int8" # 'int8' for CPU, 'float16' for GPU
     
     # Translation Settings (NLLB / CTranslate2)
-    # Using Facebook's NLLB-200-Distilled-600M for speed
-    TRANSLATION_MODEL = "facebook/nllb-200-distilled-600M"
+    # Using Facebook's NLLB-200-distilled-1.3B for better accuracy
+    # (600M model was hallucinating on simple phrases)
+    TRANSLATION_MODEL = "facebook/nllb-200-distilled-1.3B"
     TRANSLATION_DEVICE = "cpu"
     
     # TTS Settings (Piper)
