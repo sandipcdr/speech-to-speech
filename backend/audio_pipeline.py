@@ -77,12 +77,18 @@ class AudioPipeline:
         try:
             print("DEBUG: Tokenizing input...")
             # NLLB requires source language to be set
-            self.translator_tokenizer.src_lang = src_code
-            inputs = self.translator_tokenizer(text, return_tensors="pt")
+            # Explicitly pass src_lang to the call to ensure it is used
+            inputs = self.translator_tokenizer(text, return_tensors="pt", src_lang=src_code)
             
             # DEBUG: Check what the model actually sees
             print(f"DEBUG: Input Token IDs: {inputs.input_ids}")
-            print(f"DEBUG: Decoded Input: {self.translator_tokenizer.decode(inputs.input_ids[0])}")
+            decoded = self.translator_tokenizer.decode(inputs.input_ids[0])
+            print(f"DEBUG: Decoded Input: {decoded}")
+            
+            # Check if BOS token matches src_code
+            src_token_id = self.translator_tokenizer.convert_tokens_to_ids(src_code)
+            if inputs.input_ids[0][0] != src_token_id:
+                 print(f"WARNING: First token {inputs.input_ids[0][0]} does not match src_code {src_code} ({src_token_id})")
             
             print("DEBUG: Generating translation...")
             
