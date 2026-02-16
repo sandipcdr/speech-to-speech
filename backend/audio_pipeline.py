@@ -117,15 +117,9 @@ class AudioPipeline:
                 text = " ".join([item['hepburn'] for item in result])
                 print(f"DEBUG: Converted to Romaji: {text}")
 
-            # Debug text and setup
-            print(f"DEBUG: Final text to be spoken: '{text}'")
-            print(f"DEBUG: Voice config sample rate: {voice.config.sample_rate}")
-            print(f"DEBUG: Voice methods: {dir(voice)}") 
+            # Debug text
+            print(f"DEBUG: Text to synthesize: '{text}'")
             
-            # Temporary: Force fallback text
-            if target_lang == "ja":
-                 text = "Test Audio"
-
             # 1. Phonemize
             # phonemize returns a list of lists (one per sentence)
             phonemes_list = voice.phonemize(text)
