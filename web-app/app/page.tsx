@@ -19,7 +19,10 @@ export default function Home() {
     const startRecording = async () => {
         try {
             // 1. Connect WebSocket
-            const ws = new WebSocket('ws://localhost:8001/ws');
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.hostname}:8001/ws`;
+            console.log("Connecting to WebSocket:", wsUrl);
+            const ws = new WebSocket(wsUrl);
             socketRef.current = ws;
 
             ws.onopen = () => {
@@ -53,6 +56,11 @@ export default function Home() {
             ws.onerror = (error) => console.error('WS Error:', error);
 
             // 2. Capture Audio
+            if (!navigator.mediaDevices) {
+                alert("Audio access is not available! This is likely because you are accessing the site via HTTP from a remote IP. Browser security blocks microphone access in insecure contexts. \n\nPlease try:\n1. Accessing via localhost (e.g. using SSH port forwarding)\n2. Setting up HTTPS");
+                return;
+            }
+
             let stream;
             if (mode === 'system') {
                 stream = await navigator.mediaDevices.getDisplayMedia({
