@@ -10,6 +10,7 @@ export default function Home() {
     const [transcript, setTranscript] = useState('');
     const [translation, setTranslation] = useState('');
     const [mode, setMode] = useState<'mic' | 'system'>('mic');
+    const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -45,10 +46,13 @@ export default function Home() {
                 } else if (data.type === 'audio') {
                     // Play audio
                     const audio = new Audio(`data:audio/wav;base64,${data.payload}`);
+                    audio.onended = () => setIsPlayingAudio(false);
                     try {
+                        setIsPlayingAudio(true);
                         await audio.play();
                     } catch (e) {
                         console.error("Autoplay failed:", e);
+                        setIsPlayingAudio(false);
                     }
                 }
             };
@@ -212,8 +216,19 @@ export default function Home() {
                     </div>
 
                     {/* Translation */}
-                    <div className="bg-gray-900 p-6 rounded-xl border border-blue-900/30 min-h-[200px] shadow-inner shadow-black/50">
-                        <h3 className="text-blue-400 mb-2 uppercase tracking-wide text-xs font-semibold">Translated ({targetLang})</h3>
+                    <div className="bg-gray-900 p-6 rounded-xl border border-blue-900/30 min-h-[200px] shadow-inner shadow-black/50 relative">
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-blue-400 uppercase tracking-wide text-xs font-semibold">Translated ({targetLang})</h3>
+                            {isPlayingAudio && (
+                                <div className="flex items-center gap-2 text-green-400 animate-pulse text-xs font-bold">
+                                    <span className="relative flex h-3 w-3">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                    </span>
+                                    Playing Audio...
+                                </div>
+                            )}
+                        </div>
                         <p className="text-lg leading-relaxed whitespace-pre-wrap text-blue-100">{translation || "Waiting for translation..."}</p>
                     </div>
                 </div>
