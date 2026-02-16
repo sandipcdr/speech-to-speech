@@ -111,11 +111,8 @@ class AudioPipeline:
         try:
             output_buffer = io.BytesIO()
             with io.BytesIO() as wav_buffer:
-                # We use a temporary wav buffer
-                import wave
-                with wave.open(wav_buffer, "wb") as wav_file:
-                    voice.synthesize(text, wav_file)
-                
+                # Piper synthesize writes a full WAV file (headers + PCM) to the file-like object
+                voice.synthesize(text, wav_buffer)
                 return wav_buffer.getvalue()
         except Exception as e:
             print(f"ERROR in synthesize: {e}")
