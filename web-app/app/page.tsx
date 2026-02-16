@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Mic, Globe, Play, Square, Monitor } from 'lucide-react';
 
 export default function Home() {
@@ -74,7 +74,7 @@ export default function Home() {
             }
             mediaStreamRef.current = stream;
 
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+            const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)({ sampleRate: 16000 });
             audioContextRef.current = audioCtx;
 
             const source = audioCtx.createMediaStreamSource(stream);
