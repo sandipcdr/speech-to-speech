@@ -25,7 +25,7 @@ class Config:
     # ja_JP-ami-medium is a good Japanese voice
     TTS_VOICES = {
         "en": "en_US-lessac-medium",
-        "ja": "en_US-lessac-medium"
+        "ja": "ja_JP-zarvox-low"
     }
 
     # Audio Settings
