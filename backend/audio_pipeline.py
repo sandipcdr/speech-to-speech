@@ -111,13 +111,14 @@ class AudioPipeline:
             return None
             
         try:
-            # Romanize Japanese if we are using the English placeholder model
-            # if target_lang == "ja":
-            #     import pykakasi
-            #     kks = pykakasi.kakasi()
-            #     result = kks.convert(text)
-            #     text = " ".join([item['hepburn'] for item in result])
-            #     print(f"DEBUG: Converted to Romaji: {text}")        
+            # Romanize Japanese because we are forced to use an English placeholder voice
+            # (Official Japanese Piper models are not available)
+            if target_lang == "ja":
+                import pykakasi
+                kks = pykakasi.kakasi()
+                result = kks.convert(text)
+                text = " ".join([item['hepburn'] for item in result])
+                print(f"DEBUG: Converted to Romaji: {text}")
 
             # Debug text
             print(f"DEBUG: Text to synthesize: '{text}'")

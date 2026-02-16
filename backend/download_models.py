@@ -11,11 +11,11 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 VOICES = {
     "en_US-lessac-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx",
     "en_US-lessac-medium.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json",
-    # Japanese models are currently not available in the main repo.
-    # Real Japanese support requires building a custom model or finding a community link.
-    # FOUND VALID MODEL: ja_JP-kaito-medium
-    "ja_JP-kaito-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/kaito/medium/ja_JP-kaito-medium.onnx",
-    "ja_JP-kaito-medium.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/kaito/medium/ja_JP-kaito-medium.onnx.json"
+    # Japanese models are NOT available in the official Rhasspy repo.
+    # We use a high-quality English voice (libritts-high) as a placeholder.
+    # To get real Japanese, one must train a model or find a 3rd party ONNX file.
+    "ja_JP-zarvox-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx",
+    "ja_JP-zarvox-low.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx.json"
 }
 
 def download_file(url, filepath):
