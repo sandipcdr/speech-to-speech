@@ -76,6 +76,8 @@ class AudioPipeline:
             
         try:
             print("DEBUG: Tokenizing input...")
+            # NLLB requires source language to be set
+            self.translator_tokenizer.src_lang = src_code
             inputs = self.translator_tokenizer(text, return_tensors="pt")
             
             print("DEBUG: Generating translation...")
