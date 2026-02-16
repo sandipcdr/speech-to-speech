@@ -127,11 +127,19 @@ class AudioPipeline:
                  text = "Test Audio"
 
             # 1. Phonemize
-            phonemes = voice.phonemize(text)
-            print(f"DEBUG: Phonemes: {phonemes}")
+            # phonemize returns a list of lists (one per sentence)
+            phonemes_list = voice.phonemize(text)
+            print(f"DEBUG: Phonemes: {phonemes_list}")
             
             # 2. Convert to IDs
-            phoneme_ids = voice.phonemes_to_ids(phonemes)
+            phoneme_ids = []
+            if phonemes_list and isinstance(phonemes_list[0], list):
+                 for sentence in phonemes_list:
+                     phoneme_ids.extend(voice.phonemes_to_ids(sentence))
+            else:
+                 # Fallback if it wasn't a list of lists
+                 phoneme_ids = voice.phonemes_to_ids(phonemes_list)
+
             print(f"DEBUG: Phoneme IDs: {phoneme_ids}")
             
             # 3. Generate Audio
