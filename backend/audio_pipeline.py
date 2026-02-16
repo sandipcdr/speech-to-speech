@@ -120,28 +120,39 @@ class AudioPipeline:
             # Debug text and setup
             print(f"DEBUG: Final text to be spoken: '{text}'")
             print(f"DEBUG: Voice config sample rate: {voice.config.sample_rate}")
-            # print(f"DEBUG: Voice methods: {dir(voice)}") 
+            print(f"DEBUG: Voice methods: {dir(voice)}") 
             
-            # Temporary: Force fallback text to verify audio generation capability
+            # Temporary: Force fallback text
             if target_lang == "ja":
                  text = "Test Audio"
-                 print(f"DEBUG: FORCING text to '{text}' for testing")
 
-            with io.BytesIO() as wav_buffer:
-                import wave
-                with wave.open(wav_buffer, "wb") as wav_file:
+            import tempfile
+            import wave
+            
+            # Create a real temporary file on disk
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tf:
+                temp_filename = tf.name
+            
+            try:
+                # Open the file with wave and synthesize
+                with wave.open(temp_filename, "wb") as wav_file:
                     wav_file.setnchannels(1)
                     wav_file.setsampwidth(2)
                     wav_file.setframerate(voice.config.sample_rate)
-                    
-                    # Synthesize
                     voice.synthesize(text, wav_file)
                     
-                    # Check if frames were written
-                    frames_written = wav_file.getnframes()
-                    print(f"DEBUG: WAV Frames written: {frames_written}")
+                    print(f"DEBUG: Wav file frames after write: {wav_file.getnframes()}")
+
+                # Read the file back into memory
+                with open(temp_filename, "rb") as f:
+                    wav_data = f.read()
                 
-                return wav_buffer.getvalue()
+                print(f"DEBUG: Read {len(wav_data)} bytes from temp wav file")
+                return wav_data
+                
+            finally:
+                if os.path.exists(temp_filename):
+                    os.unlink(temp_filename)
         except Exception as e:
             print(f"ERROR in synthesize: {e}")
             return None
