@@ -22,10 +22,10 @@ class Config:
     PIPER_MODEL_DIR = os.path.join(os.path.dirname(__file__), "models", "piper")
     # Voice mapping structure
     # en_US-lessac-medium is a good standard voice
-    # ja_JP-ami-medium is a good Japanese voice
+    # ja_JP-kaito-medium is a good Japanese voice
     TTS_VOICES = {
         "en": "en_US-lessac-medium",
-        "ja": "ja_JP-zarvox-low"
+        "ja": "ja_JP-kaito-medium"
     }
 
     # Audio Settings
