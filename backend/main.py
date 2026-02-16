@@ -154,12 +154,15 @@ async def websocket_endpoint(websocket: WebSocket):
                         )
                         
                         if audio_wav:
+                            print(f"DEBUG: Sending audio (size: {len(audio_wav)} bytes)")
                             # Send as base64 to play in browser
                             audio_b64 = base64.b64encode(audio_wav).decode('utf-8')
                             await websocket.send_json({
                                 "type": "audio",
                                 "payload": audio_b64
                             })
+                        else:
+                            print("DEBUG: Synthesis returned empty audio.")
                     
                     # Clear buffer
                     audio_buffer = bytearray()

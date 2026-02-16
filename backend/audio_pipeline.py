@@ -109,6 +109,14 @@ class AudioPipeline:
             return None
             
         try:
+            # Romanize Japanese if we are using the English placeholder model
+            if target_lang == "ja":
+                import pykakasi
+                kks = pykakasi.kakasi()
+                result = kks.convert(text)
+                text = " ".join([item['hepburn'] for item in result])
+                print(f"DEBUG: Converted to Romaji: {text}")
+
             output_buffer = io.BytesIO()
             with io.BytesIO() as wav_buffer:
                 # Piper synthesize writes a full WAV file (headers + PCM) to the file-like object
