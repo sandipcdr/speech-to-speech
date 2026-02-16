@@ -143,26 +143,26 @@ class AudioPipeline:
             print(f"DEBUG: Phoneme IDs: {phoneme_ids}")
             
             # 3. Generate Audio
-            # output is typically (audio_bytes, sample_rate) or just audio_bytes generator?
-            # Based on method name, it likely returns the audio stream or generator.
-            
-            audio_stream = voice.phoneme_ids_to_audio(phoneme_ids)
+            # phoneme_ids_to_audio returns a numpy array of audio samples (float32)
+            audio_data = voice.phoneme_ids_to_audio(phoneme_ids)
+            print(f"DEBUG: Audio data shape: {audio_data.shape}, dtype: {audio_data.dtype}")
             
             # 4. Write to BytesIO Buffer as WAV
             with io.BytesIO() as wav_buffer:
                 import wave
                 with wave.open(wav_buffer, "wb") as wav_file:
                     wav_file.setnchannels(1)
-                    wav_file.setsampwidth(2)
+                    wav_file.setsampwidth(2) # 16-bit
                     wav_file.setframerate(voice.config.sample_rate)
                     
-                    # Consume stream
-                    sample_count = 0
-                    for chunk in audio_stream:
-                        wav_file.writeframes(chunk)
-                        sample_count += len(chunk)
+                    # Convert float32 [-1, 1] to int16 PCM
+                    # Clip to avoid overflow
+                    audio_data = np.clip(audio_data, -1.0, 1.0)
+                    audio_int16 = (audio_data * 32767).astype(np.int16)
+                    
+                    wav_file.writeframes(audio_int16.tobytes())
                         
-                    print(f"DEBUG: Written {sample_count} raw bytes to WAV")
+                    print(f"DEBUG: Written {len(audio_int16.tobytes())} bytes to WAV")
                 
                 return wav_buffer.getvalue()
         except Exception as e:
