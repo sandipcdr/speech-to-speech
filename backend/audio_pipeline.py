@@ -119,8 +119,16 @@ class AudioPipeline:
 
             output_buffer = io.BytesIO()
             with io.BytesIO() as wav_buffer:
-                # Piper synthesize writes a full WAV file (headers + PCM) to the file-like object
-                voice.synthesize(text, wav_buffer)
+                import wave
+                with wave.open(wav_buffer, "wb") as wav_file:
+                    # Explicitly set WAV parameters
+                    wav_file.setnchannels(1)  # Mono
+                    wav_file.setsampwidth(2)  # 16-bit
+                    wav_file.setframerate(voice.config.sample_rate)
+                    
+                    # Synthesize
+                    voice.synthesize(text, wav_file)
+                
                 return wav_buffer.getvalue()
         except Exception as e:
             print(f"ERROR in synthesize: {e}")
