@@ -117,50 +117,31 @@ class AudioPipeline:
                 text = " ".join([item['hepburn'] for item in result])
                 print(f"DEBUG: Converted to Romaji: {text}")
 
-            # Debug available methods
-            # print(f"DEBUG: PiperVoice methods: {dir(voice)}")
-
-            import tempfile
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_wav:
-                temp_wav_path = temp_wav.name
+            # Debug text and setup
+            print(f"DEBUG: Final text to be spoken: '{text}'")
+            print(f"DEBUG: Voice config sample rate: {voice.config.sample_rate}")
+            # print(f"DEBUG: Voice methods: {dir(voice)}") 
             
-            try:
-                # Synthesize to a file path (most robust method)
-                # Piper writes the WAV file directly to this path
-                with io.BytesIO() as wav_buffer: 
-                   # Legacy attempt removed. Using file path.
-                   pass
+            # Temporary: Force fallback text to verify audio generation capability
+            if target_lang == "ja":
+                 text = "Test Audio"
+                 print(f"DEBUG: FORCING text to '{text}' for testing")
 
-                # We open the file ourselves? No, existing examples show passing a file-like object usually works. 
-                # But to avoid 'channels not specified', let's try passing the file *object* created by wave.open?
-                # Actually, let's try passing the raw temporary file PATH if supported, 
-                # OR open a simple binary file and pass that.
+            with io.BytesIO() as wav_buffer:
+                import wave
+                with wave.open(wav_buffer, "wb") as wav_file:
+                    wav_file.setnchannels(1)
+                    wav_file.setsampwidth(2)
+                    wav_file.setframerate(voice.config.sample_rate)
+                    
+                    # Synthesize
+                    voice.synthesize(text, wav_file)
+                    
+                    # Check if frames were written
+                    frames_written = wav_file.getnframes()
+                    print(f"DEBUG: WAV Frames written: {frames_written}")
                 
-                # Let's try the stream generator approach which is safest if available?
-                # No, synthesize_stream_raw failed.
-                
-                # Fallback: Open a real file and pass it.
-                with open(temp_wav_path, "wb") as wav_file:
-                    import wave
-                    with wave.open(wav_file, "wb") as wf:
-                        # We need to rely on piper to write to it? 
-                        # If piper uses wave.open internally, passing a binary file object is best.
-                        # Wait, if piper uses wave.open, we shouldn't use wave.open.
-                        pass
-                
-                # Let's simple pass a real file object opened in 'wb'
-                with open(temp_wav_path, "wb") as f:
-                    voice.synthesize(text, f)
-                
-                # Read back
-                with open(temp_wav_path, "rb") as f:
-                    wav_bytes = f.read()
-                
-                return wav_bytes
-
-            finally:
-                if os.path.exists(temp_wav_path):
-                    os.unlink(temp_wav_path)
+                return wav_buffer.getvalue()
         except Exception as e:
             print(f"ERROR in synthesize: {e}")
             return None
