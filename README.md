@@ -41,7 +41,7 @@ uvicorn main:app --reload
 
 **Frontend**:
 ```bash
-cd frontend
+cd web-app
 npm install
 npm run dev
 ```
