@@ -24,6 +24,28 @@ app.add_middleware(
 # Initialize pipeline globally
 # Note: This loads models on startup, which might take time.
 print("Loading models...")
+
+# Check if TTS models exist, if not download them (Fix for Docker volume shadowing)
+import os
+from config import Config
+import download_models
+
+piper_dir = Config.PIPER_MODEL_DIR
+if not os.path.exists(piper_dir) or not os.listdir(piper_dir):
+    print("TTS models not found (likely shadowed by Docker volume). Downloading now...")
+    download_models.main()
+else:
+    # Check specific files just in case
+    missing = False
+    for filename in download_models.VOICES.keys():
+        if not os.path.exists(os.path.join(piper_dir, filename)):
+            missing = True
+            break
+    
+    if missing:
+        print("Some TTS models missing. Downloading...")
+        download_models.main()
+
 pipeline = AudioPipeline()
 print("Models loaded.")
 

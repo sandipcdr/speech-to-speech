@@ -36,9 +36,12 @@ def download_file(url, filepath):
     except Exception as e:
         print(f"Failed to download {url}: {e}")
 
-if __name__ == "__main__":
+def main():
     print("Downloading Piper models...")
     for filename, url in VOICES.items():
         filepath = os.path.join(MODEL_DIR, filename)
         download_file(url, filepath)
     print("Done.")
+
+if __name__ == "__main__":
+    main()
