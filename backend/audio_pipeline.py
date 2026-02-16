@@ -1,0 +1,108 @@
+import io
+import torch
+import numpy as np
+import soundfile as sf
+from faster_whisper import WhisperModel
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from piper import PiperVoice
+import os
+from config import Config
+
+class AudioPipeline:
+    def __init__(self):
+        print("Initializing Audio Pipeline...")
+        self.device = Config.STT_DEVICE
+        
+        # 1. STT: Faster-Whisper
+        print(f"Loading Whisper model ({Config.STT_MODEL_SIZE})...")
+        self.stt_model = WhisperModel(
+            Config.STT_MODEL_SIZE, 
+            device=self.device, 
+            compute_type=Config.STT_COMPUTE_TYPE
+        )
+        
+        # 2. Translation: NLLB (using transformers for simplicity in MVP, upgrade to CTranslate2 for speed if needed)
+        print(f"Loading Translation model ({Config.TRANSLATION_MODEL})...")
+        self.translator_tokenizer = AutoTokenizer.from_pretrained(Config.TRANSLATION_MODEL)
+        self.translator_model = AutoModelForSeq2SeqLM.from_pretrained(Config.TRANSLATION_MODEL)
+        
+        # 3. TTS: Piper
+        print("Loading TTS models...")
+        self.tts_voices = {}
+        for lang_code, model_name in Config.TTS_VOICES.items():
+            model_path = os.path.join(Config.PIPER_MODEL_DIR, f"{model_name}.onnx")
+            
+            # Check if exists, if not, might need to run download_models.py first
+            if os.path.exists(model_path):
+                # PiperVoice is a wrapper around onnxruntime
+                self.tts_voices[lang_code] = PiperVoice.load(model_path)
+            else:
+                print(f"Warning: TTS model not found at {model_path}. Run download_models.py")
+
+    def transcribe(self, audio_data: np.ndarray, source_lang: str):
+        # audio_data is float32 numpy array
+        # faster-whisper segments audio itself
+        # beam_size=5 for better accuracy
+        segments, _ = self.stt_model.transcribe(
+            audio_data, 
+            language=source_lang, 
+            beam_size=5
+        )
+        # Collect full text
+        text = " ".join([segment.text for segment in segments])
+        return text.strip()
+
+    def translate(self, text: str, source_lang: str, target_lang: str):
+        if not text:
+            return ""
+        
+        # Map simple lang codes to NLLB codes
+        # en -> eng_Latn, ja -> jpn_Jpan
+        lang_map = {
+            "en": "eng_Latn",
+            "ja": "jpn_Jpan",
+            # Add more if needed
+        }
+        
+        src_code = lang_map.get(source_lang)
+        tgt_code = lang_map.get(target_lang)
+        
+        if not src_code or not tgt_code:
+            return text # Fallback: return original
+            
+        inputs = self.translator_tokenizer(text, return_tensors="pt")
+        
+        translated_tokens = self.translator_model.generate(
+            **inputs, 
+            forced_bos_token_id=self.translator_tokenizer.lang_code_to_id[tgt_code], 
+            max_length=128
+        )
+        
+        result = self.translator_tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]
+        return result
+
+    def synthesize(self, text: str, target_lang: str):
+        if not text:
+            return None
+        
+        voice = self.tts_voices.get(target_lang)
+        if not voice:
+            print(f"No TTS voice found for {target_lang}")
+            return None
+            
+        # Piper expects a file-like object or path for output. 
+        # We want bytes in memory.
+        # PiperVoice.synthesize returns an iterator of audio chunks? 
+        # Actually standard python binding might write to a wav file object.
+        
+        output_buffer = io.BytesIO()
+        with io.BytesIO() as wav_buffer:
+            # We use a temporary wav buffer
+            import wave
+            with wave.open(wav_buffer, "wb") as wav_file:
+                voice.synthesize(text, wav_file)
+            
+            return wav_buffer.getvalue()
+
+# Singleton instance
+# pipeline = AudioPipeline()

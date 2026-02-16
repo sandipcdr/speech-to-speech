@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+websockets
+python-multipart
+faster-whisper
+ctranslate2
+transformers
+torch
+scipy
+soundfile
+numpy
+# For Piper TTS, we can use the python bindings or run the binary. 
+# Using ONNX runtime for Piper is common in python wrappers.
+piper-tts
