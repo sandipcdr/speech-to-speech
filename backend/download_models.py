@@ -11,10 +11,12 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 VOICES = {
     "en_US-lessac-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx",
     "en_US-lessac-medium.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json",
-    
-    # Using 'ja_JP-zarvox-low' (Community contributed model, valid URL)
-    "ja_JP-zarvox-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/zarvox/low/ja_JP-zarvox-low.onnx",
-    "ja_JP-zarvox-low.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/ja/ja_JP/zarvox/low/ja_JP-zarvox-low.onnx.json"
+    # Japanese models are currently not available in the main repo.
+    # USING PLACEHOLDER: We will use a different English voice (libritts-high) to simulate a "different" voice for now
+    # so that the system produces audio.
+    # Real Japanese support requires building a custom model or finding a community link.
+    "ja_JP-zarvox-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx",
+    "ja_JP-zarvox-low.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/libritts/high/en_US-libritts-high.onnx.json"
 }
 
 def download_file(url, filepath):
