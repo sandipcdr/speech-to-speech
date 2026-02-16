@@ -1,5 +1,8 @@
 FROM python:3.10-slim
 
+# Prevent Python from buffering stdout and stderr (for real-time logs)
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
 # Install system dependencies
@@ -19,6 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY . .
+
+# Download models during build to ensure they are available
+RUN python download_models.py
 
 # Expose port
 EXPOSE 8000

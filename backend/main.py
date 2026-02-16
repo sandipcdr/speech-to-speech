@@ -78,6 +78,18 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Convert to numpy array
                     audio_np = np.frombuffer(audio_buffer, dtype=np.int16).astype(np.float32) / 32768.0
                     
+                    # Calculate Volume (RMS)
+                    rms = np.sqrt(np.mean(audio_np**2))
+                    print(f"DEBUG: Audio RMS: {rms:.4f}")
+                    
+                    # Silence Threshold (Adjust if needed, 0.01 is a conservative starting point)
+                    SILENCE_THRESHOLD = 0.01
+                    
+                    if rms < SILENCE_THRESHOLD:
+                        print("DEBUG: Silence detected, skipping...")
+                        audio_buffer = bytearray()
+                        continue
+
                     # 1. STT (Run in thread to avoid blocking heartbeat)
                     transcript = await asyncio.to_thread(
                         pipeline.transcribe, 
