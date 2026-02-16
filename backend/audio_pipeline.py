@@ -99,7 +99,10 @@ class AudioPipeline:
             translated_tokens = self.translator_model.generate(
                 **inputs, 
                 forced_bos_token_id=forced_bos_token_id, 
-                max_length=128
+                max_length=128,
+                num_beams=5, # Use beam search for better quality
+                early_stopping=True,
+                do_sample=False # Deterministic output
             )
             
             print("DEBUG: Decoding output...")
