@@ -31,6 +31,11 @@ from config import Config
 import download_models
 
 piper_dir = Config.PIPER_MODEL_DIR
+if os.path.exists(piper_dir):
+    print(f"DEBUG: Piper dir exists. Content: {os.listdir(piper_dir)}")
+else:
+    print(f"DEBUG: Piper dir does not exist: {piper_dir}")
+
 if not os.path.exists(piper_dir) or not os.listdir(piper_dir):
     print("TTS models not found (likely shadowed by Docker volume). Downloading now...")
     download_models.main()
